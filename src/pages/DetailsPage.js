@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useFetchDetails from '../hooks/useFetchDetails';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import Divider from '../components/Divider';
 import HorizontalScrollCard from '../components/HorizontalScrollCard';
+import VideoPlay from '../components/VideoPlay';
 
 const DetailsPage = () => {
   const params = useParams();
@@ -15,6 +16,15 @@ const DetailsPage = () => {
   const { data: castData, loading: castLoading, error: castError } = useFetchDetails(`/${params.explore}/${params.id}/credits`);
   const { data: similarData } = useFetchDetails(`/${params.explore}/${params.id}/similar`);
   const { data: recommendationData } = useFetchDetails(`/${params.explore}/${params.id}/recommendations`);
+  const [ playVideo ,setPlayVideo] =useState(false)
+  const [playVideoId ,setPlayVideoId] = useState()
+   
+  const handlePlayVideo =(data) =>{
+    setPlayVideoId(data.id) 
+    setPlayVideo(true)
+  }
+ 
+
 
   if (detailsLoading || castLoading) {
     return <p className="text-center mt-10 text-gray-500">Loading...</p>;
@@ -50,6 +60,8 @@ const DetailsPage = () => {
               alt="Movie Poster"
               className="w-90 h-auto rounded-lg shadow-lg"
             />
+
+            <button   onClick={ ()=>handlePlayVideo(data)} className='mt-3 w-full py-2 px-4 text-center bg-white text-black rounded-full font-bold text-2xl hover:bg-gradient-to-l from-red-500 to-green-500 hover:scale-105 transition '> Play Now</button>
           </div>
         </div>
 
@@ -127,26 +139,22 @@ const DetailsPage = () => {
       </div>
 
       {/* Similar Items Section */}
-      {similarData?.results?.length > 0 && (
+     
         <div>
-          <HorizontalScrollCard
-            data={similarData?.results}
-            heading={`Similar ${params?.explore}`}
-            media_type={params?.explore}
-          />
+      <HorizontalScrollCard data={similarData?.results}heading={`Similar ${params?.explore}`} media_type={params?.explore}/>
+      <HorizontalScrollCard data={recommendationData?.results} heading={`Recommendations for ${params?.explore}`} media_type={params?.explore} />
+     
         </div>
-      )}
 
-      {/* Recommendations Section */}
-      {recommendationData?.results?.length > 0 && (
         <div>
-          <HorizontalScrollCard
-            data={recommendationData?.results}
-            heading={`Recommendations for ${params?.explore}`}
-            media_type={params?.explore}
-          />
-        </div>
-      )}
+             {playVideo && (
+               <VideoPlay close={() => setPlayVideo(false)} data={playVideoId} media_type={params.explore}/>
+             )}
+       </div>
+
+
+     
+
     </div>
   );
 };
